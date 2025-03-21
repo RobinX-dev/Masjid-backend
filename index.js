@@ -20,14 +20,10 @@ mongoose.connect(MONGODB_URI)
 
 // Schema Definitions
 const itemSchema = new mongoose.Schema({
-  serviceName: { type: String, required: true },
+  name: { type: String, required: true },
   pincode: { type: String, required: true },
-  serviceType: { type: String, required: true }, 
   address: { type: String, required: true }, 
-  openTime: { type: String, required: true }, 
-  closeTime: { type: String, required: true },
   gmapLink: { type: String, required: false },
-  images: { type: [String], required: false }
 });
 
 const userDetailsSchema = new mongoose.Schema({
