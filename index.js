@@ -118,7 +118,7 @@ app.post('/api/addservice', async (req, res) => {
     });
     await newService.save();
 
-    
+
     res.status(201).json({ message: 'Service added successfully.', service: newService });
   } catch (err) {
     console.error('Error adding service:', err);
@@ -127,16 +127,15 @@ app.post('/api/addservice', async (req, res) => {
 });
 
 app.post('/api/getservice', async (req, res) => {
-  const { pincode, selectedService } = req.body;
+  const { pincode } = req.body;
 
-  if (!pincode || !selectedService) {
-    return res.status(400).json({ message: "Pincode and selected service fields are required." });
+  if (!pincode ) {
+    return res.status(400).json({ message: "Pincode field is required." });
   }
 
   try {
     const filteredServices = await ServiceDetails.find({
       pincode: pincode,
-      serviceType: selectedService.toLowerCase(),
     });
 
     res.status(200).json({ filteredServices });
