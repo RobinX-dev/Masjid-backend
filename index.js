@@ -110,7 +110,7 @@ app.post('/api/addservice', async (req, res) => {
   const { name, address, pincode, gmapLink } = req.body;
 
   if (!name || !address || !pincode || !gmapLink) {
-    return res.status(400).json({ message: 'All fields are required.' });
+    return res.status(400).json({ message: 'All fields are required.', name,address,pincode,gmapLink});
   }
 
   try {
