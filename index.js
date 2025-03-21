@@ -118,6 +118,7 @@ app.post('/api/addservice', async (req, res) => {
     });
     await newService.save();
 
+    
     res.status(201).json({ message: 'Service added successfully.', service: newService });
   } catch (err) {
     console.error('Error adding service:', err);
