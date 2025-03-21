@@ -2,7 +2,6 @@ require('dotenv').config();
 const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
-const { MongoDBCollectionNamespace } = require('mongodb');
 
 const app = express();
 
@@ -108,22 +107,18 @@ app.post('/api/register', async (req, res) => {
 
 
 app.post('/api/addservice', async (req, res) => {
-  const { serviceType, serviceName, address, pincode, openTime, closeTime, gmapLink, images } = req.body;
+  const { name, address, pincode, gmapLink } = req.body;
 
-  if (!serviceType || !serviceName || !address || !pincode || !openTime || !closeTime) {
+  if (!name || !address || !pincode || !gmapLink) {
     return res.status(400).json({ message: 'All fields are required.' });
   }
 
   try {
     const newService = new ServiceDetails({
-      serviceName,
+      name,
       pincode,
-      serviceType,
       address,
-      openTime,
-      closeTime,
       gmapLink,
-      images,
     });
     await newService.save();
 
