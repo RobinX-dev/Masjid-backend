@@ -19,7 +19,6 @@ mongoose.connect(MONGODB_URI)
   .catch((error) => console.log("Error connecting to MongoDB:", error.message));
 
 // Schema Definitions
-// Schema Definitions
 const itemSchema = new mongoose.Schema({
   name: { type: String, required: true },
   pincode: { type: String, required: true },
@@ -49,11 +48,20 @@ const itemSchema = new mongoose.Schema({
     jumuah: {
       azan: { type: String, required: true },
       iqamah: { type: String, required: true },
-    }
+    },
+    // New prayer timings fields
+    ishraq: { type: String, required: false },
+    taraveeh: { type: String, required: false },
+    sahar: { type: String, required: false },
+    ifthar: { type: String, required: false },
+    eid: { type: String, required: false }
   },
 });
 
+// Models
+const ServiceDetails = mongoose.model('servicedetails', itemSchema);
 
+// User Schema (for registration and login)
 const userDetailsSchema = new mongoose.Schema({
   name: { type: String, required: true, unique: true },
   mobileNumber: { type: String, required: true },
@@ -61,11 +69,10 @@ const userDetailsSchema = new mongoose.Schema({
   password: { type: String, required: true },
 });
 
-// Models
-const ServiceDetails = mongoose.model('servicedetails', itemSchema);
+// Models for user
 const UserDetails = mongoose.model('userdetails', userDetailsSchema);
 
-
+// Get all service details
 app.get('/api/servicedetails', async (req, res) => {
   try {
     const items = await ServiceDetails.find({});
@@ -75,6 +82,7 @@ app.get('/api/servicedetails', async (req, res) => {
   }
 });
 
+// Login endpoint
 app.post('/api/login', async (req, res) => {
   const { email, password } = req.body;
   console.log(email)
@@ -99,6 +107,7 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
+// Register endpoint
 app.post('/api/register', async (req, res) => {
   const { name, mobileNumber, email, password } = req.body;
 
@@ -127,9 +136,7 @@ app.post('/api/register', async (req, res) => {
   }
 });
 
-
-
-
+// Add service endpoint
 app.post('/api/addservice', async (req, res) => {
   const { name, address, pincode, gmapLink, prayerTimings } = req.body;
 
@@ -146,13 +153,14 @@ app.post('/api/addservice', async (req, res) => {
     }
   }
 
+  // Save the new service with the prayer timings
   try {
     const newService = new ServiceDetails({
       name,
       pincode,
       address,
       gmapLink,
-      prayerTimings, // Save prayer timings to the database
+      prayerTimings, // Save prayer timings (including new fields) to the database
     });
     await newService.save();
 
@@ -163,7 +171,7 @@ app.post('/api/addservice', async (req, res) => {
   }
 });
 
-
+// Get service by pincode endpoint
 app.post('/api/getservice', async (req, res) => {
   const { pincode } = req.body;
 
@@ -186,4 +194,4 @@ app.post('/api/getservice', async (req, res) => {
 // Start the server
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
-}); 
+});
