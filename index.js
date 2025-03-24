@@ -19,17 +19,45 @@ mongoose.connect(MONGODB_URI)
   .catch((error) => console.log("Error connecting to MongoDB:", error.message));
 
 // Schema Definitions
+// Schema Definitions
 const itemSchema = new mongoose.Schema({
   name: { type: String, required: true },
   pincode: { type: String, required: true },
-  address: { type: String, required: true }, 
+  address: { type: String, required: true },
   gmapLink: { type: String, required: false },
+  prayerTimings: {
+    fajar: {
+      azan: { type: String, required: true },
+      iqamah: { type: String, required: true },
+    },
+    zuhar: {
+      azan: { type: String, required: true },
+      iqamah: { type: String, required: true },
+    },
+    asar: {
+      azan: { type: String, required: true },
+      iqamah: { type: String, required: true },
+    },
+    magrib: {
+      azan: { type: String, required: true },
+      iqamah: { type: String, required: true },
+    },
+    isha: {
+      azan: { type: String, required: true },
+      iqamah: { type: String, required: true },
+    },
+    jumuah: {
+      azan: { type: String, required: true },
+      iqamah: { type: String, required: true },
+    }
+  },
 });
+
 
 const userDetailsSchema = new mongoose.Schema({
   name: { type: String, required: true, unique: true },
-  mobileNumber:{ type: String, required: true },
-  email:{ type: String, required: true },
+  mobileNumber: { type: String, required: true },
+  email: { type: String, required: true },
   password: { type: String, required: true },
 });
 
@@ -58,7 +86,7 @@ app.post('/api/login', async (req, res) => {
   try {
     // Authenticate user
     const user = await UserDetails.findOne({ email });
-    console.log("password from DB",user)
+    console.log("password from DB", user)
 
     if (!email || user.password !== password) {
       return res.status(401).json({ message: 'Invalid name or password.' });
@@ -72,7 +100,7 @@ app.post('/api/login', async (req, res) => {
 });
 
 app.post('/api/register', async (req, res) => {
-  const { name,mobileNumber,email, password } = req.body;
+  const { name, mobileNumber, email, password } = req.body;
 
   // Check if username and password are provided
   if (!name || !password) {
@@ -87,7 +115,7 @@ app.post('/api/register', async (req, res) => {
     }
 
     // Create and save the new user
-    const newUser = new UserDetails({ name,mobileNumber,email, password });
+    const newUser = new UserDetails({ name, mobileNumber, email, password });
     await newUser.save();
 
     // Respond with success
@@ -103,10 +131,19 @@ app.post('/api/register', async (req, res) => {
 
 
 app.post('/api/addservice', async (req, res) => {
-  const { name, address, pincode, gmapLink } = req.body;
+  const { name, address, pincode, gmapLink, prayerTimings } = req.body;
 
-  if (!name || !address || !pincode || !gmapLink) {
-    return res.status(400).json({ message: 'All fields are required.', name,address,pincode,gmapLink});
+  // Validate required fields
+  if (!name || !address || !pincode || !gmapLink || !prayerTimings) {
+    return res.status(400).json({ message: 'All fields are required.', name, address, pincode, gmapLink, prayerTimings });
+  }
+
+  // Check if all prayer timings are included
+  const requiredPrayers = ['fajar', 'zuhar', 'asar', 'magrib', 'isha', 'jumuah'];
+  for (let prayer of requiredPrayers) {
+    if (!prayerTimings[prayer] || !prayerTimings[prayer].azan || !prayerTimings[prayer].iqamah) {
+      return res.status(400).json({ message: `Missing prayer timing data for ${prayer}.` });
+    }
   }
 
   try {
@@ -115,9 +152,9 @@ app.post('/api/addservice', async (req, res) => {
       pincode,
       address,
       gmapLink,
+      prayerTimings, // Save prayer timings to the database
     });
     await newService.save();
-
 
     res.status(201).json({ message: 'Service added successfully.', service: newService });
   } catch (err) {
@@ -126,10 +163,11 @@ app.post('/api/addservice', async (req, res) => {
   }
 });
 
+
 app.post('/api/getservice', async (req, res) => {
   const { pincode } = req.body;
 
-  if (!pincode ) {
+  if (!pincode) {
     return res.status(400).json({ message: "Pincode field is required." });
   }
 
